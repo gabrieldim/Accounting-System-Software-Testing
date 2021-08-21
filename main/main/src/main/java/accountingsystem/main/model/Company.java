@@ -30,7 +30,7 @@ public class Company {
     @Column(name="registered_number")
     private String registeredNumber;
 
-    @ManyToOne
+    @ManyToOne(cascade=CascadeType.ALL)
     private User user;
 
     private Long soldProducts;

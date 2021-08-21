@@ -17,7 +17,7 @@ public class Product {
     private LocalDateTime date;
     @Column(name="expiration_date")
     private LocalDateTime expirationDate;
-    @ManyToOne
+    @ManyToOne(cascade=CascadeType.ALL)
     private Manufacturer manufacturer;
 
     public Long getProcurementPrice() {

@@ -15,11 +15,11 @@ public class Turnover {
     private Integer numberProducts;
     @Column(name="amount")
     private Long amount;
-    @ManyToMany
+    @ManyToMany(cascade=CascadeType.ALL)
     private List<WorkService> workServiceList;
-    @ManyToMany
+    @ManyToMany(cascade=CascadeType.ALL)
     private List<Product> productList;
-    @ManyToOne
+    @ManyToOne(cascade=CascadeType.ALL)
     private Company company;
 
     public Turnover(LocalDateTime date, Integer numberProducts, Long amount, List<WorkService> workServiceList,
