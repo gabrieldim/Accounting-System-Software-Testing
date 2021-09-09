@@ -68,22 +68,24 @@ public class ProductControllerTests {
                 .statusCode(200);
     }
 
-    /*@Test
+
+/*
+    @Test
     void testGET_oneProduct(){
-
-
-        ValidatableResponse id = given().when()
-                .get("/getProductById/1")
+        given().when()
+                .get("/getProductById/35")
                 .then()
                 .statusCode(200)
                 .assertThat()
-                .body("id", equalTo(1));
+                .body("name", equalTo("test"));
     }*/
+
+
     @Test
     void testPOST(){
         Manufacturer manufacturer = new Manufacturer("TestUser","MKD");
 
-        String json = gson.toJson(new Product("productDescription","productName",manufacturer,150l, LocalDateTime.now(),LocalDateTime.now()));
+    String json = gson.toJson(new Product("productDescription","productName",manufacturer,150l, LocalDateTime.now(),LocalDateTime.now()));
         given()
                 .contentType(ContentType.JSON)
                 .body(json).post().then()
