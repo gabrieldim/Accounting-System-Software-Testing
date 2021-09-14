@@ -20,132 +20,187 @@ import static org.mockito.Mockito.*;
 @RunWith(MockitoJUnitRunner.class)
 public class ProductServiceImplTests {
 
-    @Mock
-    ProductRepository productRepository;
+  @Mock ProductRepository productRepository;
 
-    @InjectMocks
-    ProductServiceImpl productService;
+  @InjectMocks ProductServiceImpl productService;
 
-    @Test
-    public void getAllProductsTest() {
-        List<Product> products = new ArrayList<Product>();
-        //given
-        //we define some products with their manufacturers
-        Manufacturer manufacturer = new Manufacturer("TestUser","MKD");
-        Product product = new Product("productDescription","productName",manufacturer,150l, LocalDateTime.now(),LocalDateTime.now());
+  @Test
+  public void getAllProductsTest() {
+    List<Product> products = new ArrayList<Product>();
+    // given
+    // we define some products with their manufacturers
+    Manufacturer manufacturer = new Manufacturer("TestUser", "MKD");
+    Product product =
+        new Product(
+            "productDescription",
+            "productName",
+            manufacturer,
+            150l,
+            LocalDateTime.now(),
+            LocalDateTime.now());
 
-        Manufacturer manufacturer1 = new Manufacturer("TestUser","MKD");
-        Product product1 = new Product("productDescription","productName",manufacturer1,150l, LocalDateTime.now(),LocalDateTime.now());
+    Manufacturer manufacturer1 = new Manufacturer("TestUser", "MKD");
+    Product product1 =
+        new Product(
+            "productDescription",
+            "productName",
+            manufacturer1,
+            150l,
+            LocalDateTime.now(),
+            LocalDateTime.now());
 
-        Manufacturer manufacturer2 = new Manufacturer("TestUser","MKD");
-        Product product2 = new Product("productDescription","productName",manufacturer2,150l, LocalDateTime.now(),LocalDateTime.now());
+    Manufacturer manufacturer2 = new Manufacturer("TestUser", "MKD");
+    Product product2 =
+        new Product(
+            "productDescription",
+            "productName",
+            manufacturer2,
+            150l,
+            LocalDateTime.now(),
+            LocalDateTime.now());
 
-        //we add them to the products list
-        products.add(product);
-        products.add(product1);
-        products.add(product2);
+    // we add them to the products list
+    products.add(product);
+    products.add(product1);
+    products.add(product2);
 
-        //when
-        when(productRepository.findAll()).thenReturn(products);
+    // when
+    when(productRepository.findAll()).thenReturn(products);
 
-        //test
-        List<Product> proList = productService.findAll();
-        Assert.assertEquals(3, proList.size());
-        verify(productRepository, times(1)).findAll();
-    }
+    // test
+    List<Product> proList = productService.findAll();
+    Assert.assertEquals(3, proList.size());
+    verify(productRepository, times(1)).findAll();
+  }
 
+  @Test
+  public void deleteProductByIdTest() {
 
+    // given
+    Manufacturer manufacturer = new Manufacturer("TestUser", "MKD");
 
+    Product product =
+        new Product(
+            "productDescription",
+            "productName",
+            manufacturer,
+            150l,
+            LocalDateTime.now(),
+            LocalDateTime.now());
 
-    @Test
-    public void deleteProductByIdTest() {
+    Long productId = product.getId();
 
-        //given
-        Manufacturer manufacturer = new Manufacturer("TestUser","MKD");
+    when(productRepository.findById(productId))
+        .thenReturn(java.util.Optional.of(product))
+        .thenReturn(null);
 
-        Product product = new Product("productDescription","productName",manufacturer,150l, LocalDateTime.now(),LocalDateTime.now());
+    productService.deleteById(productId);
 
-        Long productId = product.getId();
+    // test
+    verify(productRepository).deleteById(productId);
+  }
 
-        when(productRepository.findById(productId)).thenReturn(java.util.Optional.of(product)).thenReturn(null);
+  @Test
+  public void getProductByIdTest() {
 
-        productService.deleteById(productId);
+    // creating Product
+    Manufacturer manufacturer = new Manufacturer("TestUser", "MKD");
+    Product product =
+        new Product(
+            "productDescription",
+            "productName",
+            manufacturer,
+            150l,
+            LocalDateTime.now(),
+            LocalDateTime.now());
 
-        //test
-        verify(productRepository).deleteById(productId);
-    }
+    Long productId = product.getId();
 
-    @Test
-    public void getProductByIdTest() {
+    // when
+    when(productRepository.findById(productId)).thenReturn(java.util.Optional.of(product));
 
-        //creating Product
-        Manufacturer manufacturer = new Manufacturer("TestUser", "MKD");
-        Product product = new Product("productDescription","productName",manufacturer,150l, LocalDateTime.now(),LocalDateTime.now());
+    Product product1 = productService.findById(productId);
 
-        Long productId = product.getId();
+    // test
+    Assert.assertEquals("productDescription", product1.getDescription());
+    Assert.assertEquals("productName", product1.getName());
+    Assert.assertEquals(150l, product1.getPrice().longValue());
+    Assert.assertEquals(manufacturer, product1.getManufacturer());
+  }
 
-        //when
-        when(productRepository.findById(productId)).thenReturn(java.util.Optional.of(product));
+  @Test
+  public void createProductTest() {
 
-        Product product1 = productService.findById(productId);
+    // given
+    Manufacturer manufacturer = new Manufacturer("TestUser", "MKD");
+    Product product =
+        new Product(
+            "productDescription",
+            "productName",
+            manufacturer,
+            150l,
+            LocalDateTime.now(),
+            LocalDateTime.now());
 
-        //test
-        Assert.assertEquals("productDescription", product1.getDescription());
-        Assert.assertEquals("productName", product1.getName());
-        Assert.assertEquals(150l,product1.getPrice().longValue());
-        Assert.assertEquals(manufacturer,product1.getManufacturer());
-    }
+    // when
+    when(productRepository.save(any(Product.class))).thenReturn(product);
 
-    @Test
-    public void createProductTest() {
+    Product createdProduct = productService.save(product);
 
-        //given
-        Manufacturer manufacturer = new Manufacturer("TestUser", "MKD");
-        Product product = new Product("productDescription","productName",manufacturer,150l, LocalDateTime.now(),LocalDateTime.now());
+    Assert.assertFalse(createdProduct.getName().isEmpty());
 
-        //when
-        when(productRepository.save(any(Product.class)))
-                .thenReturn(product);
+    Assert.assertEquals("productDescription", createdProduct.getDescription());
 
-        Product createdProduct = productService.save(product);
+    Assert.assertEquals(150l, createdProduct.getPrice().longValue());
+  }
 
-        Assert.assertFalse(createdProduct.getName().isEmpty());
+  @Test
+  public void findByNameLikeTest3() {
 
-        Assert.assertEquals("productDescription", createdProduct.getDescription());
+    String name = "product";
 
-        Assert.assertEquals(150l, createdProduct.getPrice().longValue());
-    }
+    List<Product> products = new ArrayList<Product>();
+    // given
+    // we define some products with their manufacturers
+    Manufacturer manufacturer = new Manufacturer("TestUser", "MKD");
 
-    @Test
-    public void findByNameLikeTest3() {
+    Product product =
+        new Product(
+            "productDescription",
+            "productName",
+            manufacturer,
+            151l,
+            LocalDateTime.now(),
+            LocalDateTime.now());
+    Product product1 =
+        new Product(
+            "productDescription1",
+            "productName1",
+            manufacturer,
+            150l,
+            LocalDateTime.now(),
+            LocalDateTime.now());
+    Product product2 =
+        new Product(
+            "productDescription2",
+            "productName2",
+            manufacturer,
+            152l,
+            LocalDateTime.now(),
+            LocalDateTime.now());
 
-        String name = "product";
+    // we add them to the products list
+    products.add(product);
+    products.add(product1);
+    products.add(product2);
 
-        List<Product> products = new ArrayList<Product>();
-        //given
-        //we define some products with their manufacturers
-        Manufacturer manufacturer = new Manufacturer("TestUser","MKD");
+    // when
+    when(productRepository.findByNameLike(name)).thenReturn(products);
 
-        Product product = new Product("productDescription","productName",manufacturer,151l, LocalDateTime.now(),LocalDateTime.now());
-        Product product1 = new Product("productDescription1","productName1",manufacturer,150l, LocalDateTime.now(),LocalDateTime.now());
-        Product product2 = new Product("productDescription2","productName2",manufacturer,152l, LocalDateTime.now(),LocalDateTime.now());
+    List<Product> expectedProducts = productService.findByNameLike(name);
 
-        //we add them to the products list
-        products.add(product);
-        products.add(product1);
-        products.add(product2);
-
-
-        //when
-        when(productRepository.findByNameLike(name)).thenReturn(products);
-
-        List<Product> expectedProducts = productService.findByNameLike(name);
-
-        //test
-        Assert.assertEquals(3, expectedProducts.size());
-        verify(productRepository, times(1)).findByNameLike(name);
-
-
-    }
-
+    // test
+    Assert.assertEquals(3, expectedProducts.size());
+    verify(productRepository, times(1)).findByNameLike(name);
+  }
 }

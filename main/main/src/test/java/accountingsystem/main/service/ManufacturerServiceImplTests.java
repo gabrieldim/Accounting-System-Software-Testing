@@ -19,117 +19,111 @@ import static org.mockito.Mockito.*;
 @RunWith(MockitoJUnitRunner.class)
 public class ManufacturerServiceImplTests {
 
-    @InjectMocks
-    ManufacturerServiceImpl manufacturerService;
+  @InjectMocks ManufacturerServiceImpl manufacturerService;
 
-    @Mock
-    ManufacturerRepository manufacturerRepository;
+  @Mock ManufacturerRepository manufacturerRepository;
 
-    @Test
-    public void getAllManufacturersTest() {
-        List<Manufacturer> list = new ArrayList<Manufacturer>();
-        //we define some manufacturers
-        Manufacturer manufacturer = new Manufacturer("TestUser", "USA");
-        Manufacturer manufacturer1 = new Manufacturer("TestUser", "SRB");
-        Manufacturer manufacturer2 = new Manufacturer("TestUser", "RS");
-        //we add them in predefined list
-        list.add(manufacturer);
-        list.add(manufacturer1);
-        list.add(manufacturer2);
+  @Test
+  public void getAllManufacturersTest() {
+    List<Manufacturer> list = new ArrayList<Manufacturer>();
+    // we define some manufacturers
+    Manufacturer manufacturer = new Manufacturer("TestUser", "USA");
+    Manufacturer manufacturer1 = new Manufacturer("TestUser", "SRB");
+    Manufacturer manufacturer2 = new Manufacturer("TestUser", "RS");
+    // we add them in predefined list
+    list.add(manufacturer);
+    list.add(manufacturer1);
+    list.add(manufacturer2);
 
-        when(manufacturerRepository.findAll()).thenReturn(list);
+    when(manufacturerRepository.findAll()).thenReturn(list);
 
-        //test
-        List<Manufacturer> manList = manufacturerService.findAll();
-        Assert.assertEquals(3, manList.size());
-        verify(manufacturerRepository, times(1)).findAll();
+    // test
+    List<Manufacturer> manList = manufacturerService.findAll();
+    Assert.assertEquals(3, manList.size());
+    verify(manufacturerRepository, times(1)).findAll();
+  }
 
+  @Test
+  public void getManufacturerByIdTest() {
 
-    }
+    // creating Manufacturer
+    Manufacturer manufacturer = new Manufacturer("TestUser", "MKD");
 
-    @Test
-    public void getManufacturerByIdTest() {
+    Long manufacturerId = manufacturer.getId();
 
-        //creating Manufacturer
-        Manufacturer manufacturer = new Manufacturer("TestUser", "MKD");
+    when(manufacturerRepository.findById(manufacturerId))
+        .thenReturn(java.util.Optional.of(manufacturer));
 
-        Long manufacturerId = manufacturer.getId();
+    Manufacturer manufacturer1 = manufacturerService.findById(manufacturerId);
 
-        when(manufacturerRepository.findById(manufacturerId)).thenReturn(java.util.Optional.of(manufacturer));
+    Assert.assertEquals("TestUser", manufacturer1.getName());
+    Assert.assertEquals("MKD", manufacturer1.getCountry());
+  }
 
-        Manufacturer manufacturer1 = manufacturerService.findById(manufacturerId);
+  @Test
+  public void createManufacturerTest() {
 
-        Assert.assertEquals("TestUser", manufacturer1.getName());
-        Assert.assertEquals("MKD", manufacturer1.getCountry());
-    }
+    Manufacturer manufacturer = new Manufacturer("Viktor", "MKD");
 
+    when(manufacturerRepository.save(any(Manufacturer.class))).thenReturn(manufacturer);
 
-    @Test
-    public void createManufacturerTest() {
+    Manufacturer createdManufacturer =
+        manufacturerService.save(manufacturer.getName(), manufacturer.getCountry());
 
-        Manufacturer manufacturer = new Manufacturer("Viktor","MKD");
+    Assert.assertFalse(createdManufacturer.getName().isEmpty());
 
-        when(manufacturerRepository.save(any(Manufacturer.class))).thenReturn(manufacturer);
+    Assert.assertEquals("Viktor", createdManufacturer.getName());
 
-        Manufacturer createdManufacturer = manufacturerService.save(manufacturer.getName(),manufacturer.getCountry());
+    Assert.assertEquals("MKD", createdManufacturer.getCountry());
 
-        Assert.assertFalse(createdManufacturer.getName().isEmpty());
+    //        Manufacturer manufacturer = new Manufacturer("Viktor","MKD");
+    //
+    //        when(manufacturerRepository.save(manufacturer)).thenReturn(manufacturer);
+    //
+    //
+    // Assert.assertEquals(manufacturer,manufacturerService.save(manufacturer.getName(),manufacturer.getCountry()));
 
-        Assert.assertEquals("Viktor",createdManufacturer.getName());
+  }
 
-        Assert.assertEquals("MKD",createdManufacturer.getCountry());
+  @Test
+  public void deleteManufacturerByIdTest() {
+    // given
+    Manufacturer manufacturer = new Manufacturer("Viksa", "USA");
 
+    Long manufacturerId = manufacturer.getId();
 
-//        Manufacturer manufacturer = new Manufacturer("Viktor","MKD");
-//
-//        when(manufacturerRepository.save(manufacturer)).thenReturn(manufacturer);
-//
-//        Assert.assertEquals(manufacturer,manufacturerService.save(manufacturer.getName(),manufacturer.getCountry()));
+    // when
+    when(manufacturerRepository.findById(manufacturerId))
+        .thenReturn(java.util.Optional.of(manufacturer))
+        .thenReturn(null);
 
+    manufacturerService.deleteById(manufacturerId);
 
-    }
+    // test
+    verify(manufacturerRepository).deleteById(manufacturerId);
+  }
 
-    @Test
-    public void deleteManufacturerByIdTest() {
-        //given
-        Manufacturer manufacturer = new Manufacturer("Viksa","USA");
+  @Test
+  public void findByNameLikeTest() {
 
-        Long manufacturerId = manufacturer.getId();
+    String name = "Vik";
 
-        //when
-        when(manufacturerRepository.findById(manufacturerId)).thenReturn(java.util.Optional.of(manufacturer)).thenReturn(null);
+    List<Manufacturer> list = new ArrayList<Manufacturer>();
+    // we define some manufacturers
+    Manufacturer manufacturer = new Manufacturer("Viktor", "USA");
+    Manufacturer manufacturer1 = new Manufacturer("Viksa", "SRB");
+    Manufacturer manufacturer2 = new Manufacturer("Viktorija", "RS");
+    // we add them in predefined list
+    list.add(manufacturer);
+    list.add(manufacturer1);
+    list.add(manufacturer2);
 
+    // when
+    when(manufacturerRepository.findByNameLike(name)).thenReturn(list);
 
-         manufacturerService.deleteById(manufacturerId);
-
-        //test
-         verify(manufacturerRepository).deleteById(manufacturerId);
-
-    }
-
-    @Test
-    public void findByNameLikeTest() {
-
-        String name = "Vik";
-
-        List<Manufacturer> list = new ArrayList<Manufacturer>();
-        //we define some manufacturers
-        Manufacturer manufacturer = new Manufacturer("Viktor", "USA");
-        Manufacturer manufacturer1 = new Manufacturer("Viksa", "SRB");
-        Manufacturer manufacturer2 = new Manufacturer("Viktorija", "RS");
-        //we add them in predefined list
-        list.add(manufacturer);
-        list.add(manufacturer1);
-        list.add(manufacturer2);
-
-        //when
-        when(manufacturerRepository.findByNameLike(name)).thenReturn(list);
-
-        //then
-        List<Manufacturer> expectedManufacturers = manufacturerService.findByNameLike(name);
-        Assert.assertEquals(3, expectedManufacturers.size());
-        verify(manufacturerRepository, times(1)).findByNameLike(name);
-
-
-    }
+    // then
+    List<Manufacturer> expectedManufacturers = manufacturerService.findByNameLike(name);
+    Assert.assertEquals(3, expectedManufacturers.size());
+    verify(manufacturerRepository, times(1)).findByNameLike(name);
+  }
 }

@@ -23,120 +23,117 @@ import static org.mockito.Mockito.times;
 @RunWith(MockitoJUnitRunner.class)
 public class WorkServiceImplTests {
 
-    @Mock
-    WorkServiceRepository workServiceRepository;
+  @Mock WorkServiceRepository workServiceRepository;
 
-    @InjectMocks
-    WorkServicesServiceImpl workServicesService;
+  @InjectMocks WorkServicesServiceImpl workServicesService;
 
+  @Test
+  public void getAllWorkServicesTest() {
+    List<WorkService> services = new ArrayList<WorkService>();
+    // given
+    // we define some workservices
+    WorkService workService = new WorkService("testName", "testDescription", 150l);
+    WorkService workService1 = new WorkService("testName1", "testDescription1", 150l);
+    WorkService workService2 = new WorkService("testName2", "testDescription2", 150l);
 
-    @Test
-    public void getAllWorkServicesTest() {
-        List<WorkService> services = new ArrayList<WorkService>();
-        //given
-        //we define some workservices
-        WorkService workService = new WorkService("testName", "testDescription", 150l);
-        WorkService workService1 = new WorkService("testName1", "testDescription1", 150l);
-        WorkService workService2 = new WorkService("testName2", "testDescription2", 150l);
+    // we add them to the products list
+    services.add(workService);
+    services.add(workService1);
+    services.add(workService2);
 
-        //we add them to the products list
-        services.add(workService);
-        services.add(workService1);
-        services.add(workService2);
+    // when
+    when(workServiceRepository.findAll()).thenReturn(services);
 
-        //when
-        when(workServiceRepository.findAll()).thenReturn(services);
+    // test
+    List<WorkService> serList = workServicesService.findAll();
+    Assert.assertEquals(3, serList.size());
+    verify(workServiceRepository, times(1)).findAll();
+  }
 
-        //test
-        List<WorkService> serList = workServicesService.findAll();
-        Assert.assertEquals(3, serList.size());
-        verify(workServiceRepository, times(1)).findAll();
-    }
+  @Test
+  public void deleteWorkServiceByIdTest() {
 
+    // given
+    WorkService workService = new WorkService("testName", "testDescription", 150l);
 
-    @Test
-    public void deleteWorkServiceByIdTest() {
+    Long workServiceId = workService.getId();
 
-        //given
-        WorkService workService = new WorkService("testName", "testDescription", 150l);
+    when(workServiceRepository.findById(workServiceId))
+        .thenReturn(java.util.Optional.of(workService))
+        .thenReturn(null);
 
-        Long workServiceId = workService.getId();
+    workServicesService.deleteById(workServiceId);
 
-        when(workServiceRepository.findById(workServiceId)).thenReturn(java.util.Optional.of(workService)).thenReturn(null);
+    // test
+    verify(workServiceRepository).deleteById(workServiceId);
+  }
 
-        workServicesService.deleteById(workServiceId);
+  @Test
+  public void findByNameLikeTest3() {
 
-        //test
-        verify(workServiceRepository).deleteById(workServiceId);
-    }
+    List<WorkService> services = new ArrayList<WorkService>();
 
-    @Test
-    public void findByNameLikeTest3() {
+    // given
+    WorkService workService = new WorkService("testName", "testDescription", 150l);
+    WorkService workService1 = new WorkService("testNa", "testDescription1", 150l);
+    WorkService workService2 = new WorkService("test", "testDescription2", 150l);
 
+    // we add them to the products list
+    services.add(workService);
+    services.add(workService1);
+    services.add(workService2);
 
-        List<WorkService> services = new ArrayList<WorkService>();
+    String name = "test";
 
-        //given
-        WorkService workService = new WorkService("testName", "testDescription", 150l);
-        WorkService workService1 = new WorkService("testNa", "testDescription1", 150l);
-        WorkService workService2 = new WorkService("test", "testDescription2", 150l);
+    // when
+    when(workServiceRepository.findByNameLike(name)).thenReturn(services);
 
-        //we add them to the products list
-        services.add(workService);
-        services.add(workService1);
-        services.add(workService2);
+    List<WorkService> expectedWorkServices = workServicesService.findByNameLike(name);
 
-        String name = "test";
+    // test
+    Assert.assertEquals(3, expectedWorkServices.size());
+    verify(workServiceRepository, times(1)).findByNameLike(name);
+  }
 
-        //when
-        when(workServiceRepository.findByNameLike(name)).thenReturn(services);
+  @Test
+  public void getWorkServiceByIdTest() {
 
-        List<WorkService> expectedWorkServices = workServicesService.findByNameLike(name);
+    // creating workService
+    WorkService workService = new WorkService("testName", "testDescription", 150l);
 
-        //test
-        Assert.assertEquals(3, expectedWorkServices.size());
-        verify(workServiceRepository, times(1)).findByNameLike(name);
+    Long workServiceId = workService.getId();
 
+    // when
+    when(workServiceRepository.findById(workServiceId))
+        .thenReturn(java.util.Optional.of(workService));
 
-    }
+    WorkService workService1 = workServicesService.findById(workServiceId);
 
-    @Test
-    public void getWorkServiceByIdTest() {
+    Assert.assertEquals("testName", workService1.getName());
+    Assert.assertEquals("testDescription", workService1.getDescription());
+    Assert.assertEquals(150l, workService1.getPrice().longValue());
+  }
 
-        //creating workService
-        WorkService workService = new WorkService("testName", "testDescription", 150l);
+  @Test
+  public void createWorkServiceTest() {
 
-        Long workServiceId = workService.getId();
+    // given
+    WorkService workService = new WorkService("testName", "testDescription", 150l);
 
-        //when
-        when(workServiceRepository.findById(workServiceId)).thenReturn(java.util.Optional.of(workService));
+    // when
+    when(workServiceRepository.save(any(WorkService.class))).thenReturn(workService);
 
-        WorkService workService1 = workServicesService.findById(workServiceId);
+    WorkService createdWorkService =
+        workServicesService.save(
+            workService.getName(), workService.getDescription(), workService.getPrice());
 
-        Assert.assertEquals("testName", workService1.getName());
-        Assert.assertEquals("testDescription", workService1.getDescription());
-        Assert.assertEquals(150l, workService1.getPrice().longValue());
-    }
+    // test
+    Assert.assertFalse(createdWorkService.getName().isEmpty());
 
-    @Test
-    public void createWorkServiceTest() {
+    Assert.assertEquals("testName", createdWorkService.getName());
 
-        //given
-        WorkService workService = new WorkService("testName", "testDescription", 150l);
+    Assert.assertEquals("testDescription", createdWorkService.getDescription());
 
-        //when
-        when(workServiceRepository.save(any(WorkService.class))).thenReturn(workService);
-
-        WorkService createdWorkService = workServicesService.save(workService.getName(),workService.getDescription(),workService.getPrice());
-
-        //test
-        Assert.assertFalse(createdWorkService.getName().isEmpty());
-
-        Assert.assertEquals("testName",createdWorkService.getName());
-
-        Assert.assertEquals("testDescription",createdWorkService.getDescription());
-
-        Assert.assertEquals(150l,createdWorkService.getPrice().longValue());
-    }
-
+    Assert.assertEquals(150l, createdWorkService.getPrice().longValue());
+  }
 }

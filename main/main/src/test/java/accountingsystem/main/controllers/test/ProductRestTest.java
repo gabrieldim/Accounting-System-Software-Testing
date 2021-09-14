@@ -28,66 +28,77 @@ import static org.junit.jupiter.api.Assertions.assertNotNull;
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.get;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.status;
 
-//@RunWith(MockitoJUnitRunner.class)
+// @RunWith(MockitoJUnitRunner.class)
 @WebMvcTest(RestProductController.class)
 @RunWith(SpringRunner.class)
 @ContextConfiguration("/applicationContext.xml")
 public class ProductRestTest {
 
+  /*
+      @Autowired
+      private ObjectMapper objectMapper;
+  */
+  @MockBean private ProductService productService;
 
-/*
-    @Autowired
-    private ObjectMapper objectMapper;
-*/
-    @MockBean
-    private ProductService productService;
+  @MockBean private ManufacturerService manufacturerService;
 
-    @MockBean
-    private ManufacturerService manufacturerService;
+  @Autowired private WebApplicationContext webApplicationContext;
 
+  @Autowired public ProductRepository productRepository;
 
-    @Autowired
-    private WebApplicationContext webApplicationContext;
-
-
-    @Autowired
-    public ProductRepository productRepository;
-
-    @Autowired
-    private MockMvc mockMvc;
-
+  @Autowired private MockMvc mockMvc;
 
   /*  @BeforeEach
-    void setMockMvc(){
-        this.mockMvc = MockMvcBuilders.standaloneSetup(new RestProductController(null,null,null)).build();
-    }*/
+  void setMockMvc(){
+      this.mockMvc = MockMvcBuilders.standaloneSetup(new RestProductController(null,null,null)).build();
+  }*/
 
-    @Test
-    public void Testtest() {
-        assertNotNull(mockMvc);
-    }
+  @Test
+  public void Testtest() {
+    assertNotNull(mockMvc);
+  }
 
-    @Test
-    public void Test()throws Exception{
+  @Test
+  public void Test() throws Exception {
 
-        Manufacturer manufacturer = new Manufacturer("TestUser","MKD");
-        Product product1 = new Product("productDescription","productName1",manufacturer,150l, LocalDateTime.now(),LocalDateTime.now());
-        Product product2 = new Product("productDescription","productName2",manufacturer,150l, LocalDateTime.now(),LocalDateTime.now());
-        Product product3 = new Product("productDescription","productName3",manufacturer,150l, LocalDateTime.now(),LocalDateTime.now());
-        productRepository.save(product1);
-        productRepository.save(product2);
-        productRepository.save(product3);
+    Manufacturer manufacturer = new Manufacturer("TestUser", "MKD");
+    Product product1 =
+        new Product(
+            "productDescription",
+            "productName1",
+            manufacturer,
+            150l,
+            LocalDateTime.now(),
+            LocalDateTime.now());
+    Product product2 =
+        new Product(
+            "productDescription",
+            "productName2",
+            manufacturer,
+            150l,
+            LocalDateTime.now(),
+            LocalDateTime.now());
+    Product product3 =
+        new Product(
+            "productDescription",
+            "productName3",
+            manufacturer,
+            150l,
+            LocalDateTime.now(),
+            LocalDateTime.now());
+    productRepository.save(product1);
+    productRepository.save(product2);
+    productRepository.save(product3);
 
+    List<Product> listproducts = new ArrayList<Product>();
+    listproducts.add(product1);
+    listproducts.add(product2);
+    listproducts.add(product3);
+    Mockito.when(productRepository.findAll()).thenReturn(listproducts);
+    String url = "/api/product/getAllProducts";
 
-        List<Product> listproducts = new ArrayList<Product>();
-        listproducts.add(product1);
-        listproducts.add(product2);
-        listproducts.add(product3);
-        Mockito.when(productRepository.findAll()).thenReturn(listproducts);
-        String url = "/api/product/getAllProducts";
-
-        mockMvc.perform(get("http://localhost:8080/api/product/getAllProducts")).andExpect(status().isOk());
-    }
-
-
+    mockMvc
+        .perform(get("http://localhost:8080/api/product/getAllProducts"))
+        .andExpect(status().isOk());
+  }
 }

@@ -15,47 +15,32 @@ import static org.hamcrest.Matchers.lessThan;
 @DataJpaTest
 @RunWith(SpringRunner.class)
 public class UserControllerTests {
-    Gson gson;
+  Gson gson;
 
-    @BeforeSuite
-    public void setup(){
-        baseURI = "http://localhost";
-        port = 8080;
-        basePath = "api/user";
-        gson = new Gson();
-    }
+  @BeforeSuite
+  public void setup() {
+    baseURI = "http://localhost";
+    port = 8080;
+    basePath = "api/user";
+    gson = new Gson();
+  }
 
-    @Test
-    void testGET_statusCode(){
-        given().when()
-                .get()
-                .then()
-                .statusCode(200);
-    }
+  @Test
+  void testGET_statusCode() {
+    given().when().get().then().statusCode(200);
+  }
 
+  @Test
+  void measureResponseTime() {
+    //        Response response = get();
+    //        long timeInMS = response.time();
+    //        long timeInS = response.timeIn(TimeUnit.SECONDS);
+    //        assertTrue(600 > timeInMS);
+    given().when().get().then().time(lessThan(600L));
+  }
 
-
-    @Test
-    void measureResponseTime(){
-//        Response response = get();
-//        long timeInMS = response.time();
-//        long timeInS = response.timeIn(TimeUnit.SECONDS);
-//        assertTrue(600 > timeInMS);
-        given().when()
-                .get()
-                .then()
-                .time(lessThan(600L));
-    }
-
-    @Test
-    void testGET_logResponse(){
-        given().when()
-                .get()
-                .then()
-                .log()
-                .body()
-                .statusCode(200);
-    }
-
-
+  @Test
+  void testGET_logResponse() {
+    given().when().get().then().log().body().statusCode(200);
+  }
 }

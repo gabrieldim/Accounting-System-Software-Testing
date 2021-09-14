@@ -58,6 +58,11 @@
 				</exclusion>
 			</exclusions>
 		</dependency>
+		<dependency>
+			<groupId>com.google.googlejavaformat</groupId>
+			<artifactId>google-java-format</artifactId>
+			<version>1.11.0</version>
+		</dependency>
 
 		<dependency>
 			<groupId>junit</groupId>
